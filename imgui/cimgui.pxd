@@ -183,6 +183,14 @@ cdef extern from "imgui.h":
         ImVector[ImDrawIdx]  IdxBuffer  # ✓
         ImVector[ImDrawVert] VtxBuffer  # ✓
 
+        void ChannelsSplit(int channels_count) except +
+        void ChannelsMerge() except +
+        void ChannelsSetCurrent(int idx) except +
+
+        void AddLine(const ImVec2& a, const ImVec2& b, ImU32 col, float thickness) except +
+        # void AddRect(const ImVec2& a, const ImVec2& b, ImU32 col, float rounding = 0.0f,
+        #              int rounding_corners_flags = ImDrawCornerFlags_All, float thickness = 1.0f); 
+        # a: upper-left, b: lower-right, rounding_corners_flags: 4-bits corresponding to which corner to round
 
     ctypedef struct ImDrawData:  # ✓
         bool            Valid  # ✓
@@ -272,6 +280,7 @@ cdef extern from "imgui.h" namespace "ImGui":
     # note: Render runs callbacks that may be arbitrary Python code
     #       so we need to propagate exceptions from them
     void Render() except +  # ✓
+    # void EndFrame() except + # TODO: requires newer imgui
     void Shutdown() except +  # ✓
     void ShowUserGuide() except +  # ✓
     void ShowStyleEditor(ImGuiStyle*) except +  # ✓
@@ -303,6 +312,7 @@ cdef extern from "imgui.h" namespace "ImGui":
     ImVec2 GetWindowContentRegionMax() except +  # ✓
     float GetWindowContentRegionWidth() except +  # ✓
     ImDrawList* GetWindowDrawList() except +  # ✓
+    # ImDrawList* GetOverlayDrawList() except + # TODO: requires newer imgui
     ImVec2 GetWindowPos() except +  # ✓
     ImVec2 GetWindowSize() except +  # ✓
     float GetWindowWidth() except +  # ✓

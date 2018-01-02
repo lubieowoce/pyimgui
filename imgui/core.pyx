@@ -31,6 +31,7 @@ cimport enums
 from cpython.version cimport PY_MAJOR_VERSION
 
 # todo: find a way to cimport this directly from imgui.h
+# DEF TARGET_IMGUI_VERSION = (1, 49)
 DEF TARGET_IMGUI_VERSION = (1, 49)
 
 cdef unsigned short* _LATIN_ALL = [0x0020, 0x024F , 0]
@@ -278,6 +279,54 @@ cdef class _DrawList(object):
         instance = _DrawList()
         instance._ptr = ptr
         return instance
+    # example method definition:
+    # def deindex_all_buffers(self):
+    #     self._require_pointer()
+    #     self._ptr.DeIndexAllBuffers()
+
+    # methods to be wrapped:
+    # void ChannelsSplit(int channels_count)
+    # void ChannelsMerge()
+    # void ChannelsSetCurrent(int idx)
+
+    def channels_split(self, channels_count):
+        """
+        Warning - splitting channels doesn't always give you "layers".
+        Child windows are always drawn after their parent, so they will
+        paint over all the channels no matter what.
+
+        A comment from imgui's creator:
+
+        > > [...] how to force GetWindowDrawList to draw on top of everything?
+        > Drawing commands are processed in order within a window [...], and then child window
+        > are drawn after their parent. There's no explicit finer control of z-ordering yet,
+        > but if you have child windows and you want [...] to draw over them,
+        > a workaround is to create a final child window, push a fullscreen clip rectangle
+        > and draw there. There's an OverlayDrawList in imgui_internal.h (not exposed yet)
+        > which is basically just a ImDrawList that drawn last. Or you can either create your own ImDrawList.
+        > You can inspect the draw order in the metrics window (call ShowMetricsWindow()).
+
+        https://github.com/ocornut/imgui/issues/811#issuecomment-243369933"
+        """
+        self._ptr.ChannelsSplit(channels_count)
+    def channels_set_current(self, idx):
+        self._ptr.ChannelsSetCurrent(idx)
+    def channels_merge(self):
+        self._ptr.ChannelsMerge()
+
+    def add_line(self, a, b, color, thickness=1.0):
+        """
+        .. wraps::
+            void AddLine(const ImVec2& a, const ImVec2& b, ImU32 col, float thickness = 1.0f)
+
+        """
+
+        a1 = _cast_tuple_ImVec2(a)
+        b1 = _cast_tuple_ImVec2(b)
+
+        color1 = cimgui.ColorConvertFloat4ToU32(_cast_tuple_ImVec4(color))
+        self._ptr.AddLine(a1, b1, color1, thickness)
+
 
     @property
     def cmd_buffer_size(self):
@@ -1001,6 +1050,13 @@ def render():
     """
     cimgui.Render()
 
+# TODO: requires newer imgui
+# def end_frame():
+#     """ Finalize frame, but don't run the render callback. 
+#     .. wraps::
+#         void EndFrame()
+#     """
+#     cimgui.EndFrame()
 
 def shutdown():
     """Shutdown ImGui context.
@@ -1158,6 +1214,15 @@ def get_draw_data():
         ImDrawData* GetDrawData()
     """
     return _DrawData.from_ptr(cimgui.GetDrawData())
+
+def get_window_draw_list():
+    # TODO: document
+    return _DrawList.from_ptr(cimgui.GetWindowDrawList())
+
+# TODO: requires newer imgui
+# def get_overlay_draw_list():
+#     # TODO: document
+#     return _DrawList.from_ptr(cimgui.GetOverlayDrawList())
 
 
 def end():

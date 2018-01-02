@@ -7,14 +7,15 @@ from setuptools import setup, Extension, find_packages
 
 try:
     from Cython.Build import cythonize
-except ImportError:
+except ImportError as ie:
+    print("Error while importing Cython:", ie)
     # A 'cythonize' stub is needed so that build, develop and install can
     # start before Cython is installed.
     cythonize = lambda extensions, **kwargs: extensions  # noqa
     USE_CYTHON = False
 else:
     USE_CYTHON = True
-
+print("USE_CYTHON:", USE_CYTHON )
 
 _CYTHONIZE_WITH_COVERAGE = os.environ.get("_CYTHONIZE_WITH_COVERAGE", False)
 
@@ -127,7 +128,11 @@ EXTENSIONS = [
         include_dirs=['imgui', 'config-cpp', 'imgui-cpp'],
     ),
 ]
+ex = EXTENSIONS[0]
 
+print("sources:", ex.sources)
+print("include_dirs:", ex.include_dirs)
+print("library_dirs:", ex.library_dirs)
 
 setup(
     name='imgui',
