@@ -2941,6 +2941,7 @@ def combo(str label, int current, list items, int height_in_items=-1):
     cdef int inout_current = current
 
     in_items = "\0".join(items)
+    in_items.append("\0")
 
     return cimgui.Combo(
         _bytes(label), &inout_current, _bytes(in_items), height_in_items
