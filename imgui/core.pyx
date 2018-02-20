@@ -244,7 +244,8 @@ cdef cimgui.ImVec4 _cast_args_ImVec4(float x, float y, float z, float w):  # noq
 
 
 cdef _cast_ImVec4_tuple(cimgui.ImVec4 vec):  # noqa
-    return Vec4(vec.x, vec.y, vec.w, vec.z)
+    # return Vec4(vec.x, vec.y, vec.w, vec.z) # Is there a reason why vec.w and vec.z were swapped?
+    return Vec4(vec.x, vec.y, vec.z, vec.w)
 
 
 cdef class _DrawCmd(object):
