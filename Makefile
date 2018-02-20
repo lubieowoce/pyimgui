@@ -28,7 +28,7 @@ clean:
 .PHONY: build
 build: bootstrap
 	python -m pip install -e . -v
-	# python ci/completion.py -o README.md with-pxd imgui/cimgui.pxd
+#	python ci/completion.py -o README.md with-pxd imgui/cimgui.pxd
 
 
 .PHONY: rebuild
