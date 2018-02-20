@@ -448,15 +448,15 @@ cdef extern from "imgui.h" namespace "ImGui":
     ) except +
     void BeginGroup() except +  # ✓
     void EndGroup() except +  # ✓
-    ImVec2 GetCursorPos() except +  # ✗
+    ImVec2 GetCursorPos() except +  # ✓
     float GetCursorPosX() except +  # ✗
     float GetCursorPosY() except +  # ✗
-    void SetCursorPos(const ImVec2& local_pos) except +  # ✗
+    void SetCursorPos(const ImVec2& local_pos) except +  # ✓
     void SetCursorPosX(float x) except +  # ✗
     void SetCursorPosY(float y) except +  # ✗
     ImVec2 GetCursorStartPos() except +  # ✗
-    ImVec2 GetCursorScreenPos() except +  # ✗
-    void SetCursorScreenPos(const ImVec2& pos) except +  # ✗
+    ImVec2 GetCursorScreenPos() except +  # ✓
+    void SetCursorScreenPos(const ImVec2& pos) except +  # ✓
     void AlignFirstTextHeightToWidgets() except +  # ✗
     float GetTextLineHeight() except +  # ✗
     float GetTextLineHeightWithSpacing() except +  # ✗

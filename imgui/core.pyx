@@ -1308,6 +1308,19 @@ def end_child():
     cimgui.EndChild()
 
 
+def get_cursor_position():
+    return _cast_ImVec2_tuple(cimgui.GetCursorPos())
+
+def set_cursor_position(local_position: Vec2):
+    cimgui.SetCursorPos(_cast_tuple_ImVec2(local_position))
+
+def get_cursor_screen_position():
+    return _cast_ImVec2_tuple(cimgui.GetCursorScreenPos());
+
+def set_cursor_screen_position(screen_position: Vec2):
+    cimgui.SetCursorScreenPos(_cast_tuple_ImVec2(screen_position))
+
+
 def get_content_region_max():
     """Get current content boundaries in window coordinates.
 
