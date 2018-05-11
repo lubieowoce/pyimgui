@@ -4750,6 +4750,67 @@ def is_mouse_hovering_rect(
     )
 
 
+def is_mouse_clicked(int button = 0, bool repeat = False):
+    """Returns if the mouse was clicked this frame.
+
+    Args:
+        button (int): mouse button index.
+        repeat (float): 
+
+    Returns:
+        bool: if the mouse was clicked this frame.
+
+    .. wraps::
+        bool IsMouseClicked(int button, bool repeat = false)
+    """
+    return cimgui.IsMouseClicked(button, repeat)
+
+
+def is_mouse_released(int button = 0):
+    """Returns if the mouse was released this frame.
+
+    Args:
+        button (int): mouse button index.
+
+    Returns:
+        bool: if the mouse was released this frame.
+
+    .. wraps::
+        bool IsMouseReleased(int button)
+    """
+    return cimgui.IsMouseReleased(button)
+
+
+def is_mouse_down(int button = 0):
+    """Returns if the mouse is down.
+
+    Args:
+        button (int): mouse button index.
+
+    Returns:
+        bool: if the mouse is down.
+
+    .. wraps::
+        bool IsMouseDown(int button)
+    """
+    return cimgui.IsMouseDown(button)
+
+
+def is_mouse_up(int button = 0):
+    """Returns if the mouse is up.
+
+    Args:
+        button (int): mouse button index.
+
+    Returns:
+        bool: if the mouse is up.
+
+    .. wraps::
+        bool IsMouseDown(int button)
+    """
+    return not cimgui.IsMouseDown(button)
+
+
 def is_mouse_dragging(int button = 0, float lock_threshold = -1.0):
     """Returns if mouse is dragging.
 
