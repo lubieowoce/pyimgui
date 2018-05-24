@@ -99,7 +99,15 @@ class GlfwRenderer(ProgrammablePipelineRenderer):
         dw, dh = glfw.get_framebuffer_size(self.window)
 
         io.display_size = w, h
-        io.display_fb_scale = float(dw)/w, float(dh)/h
+
+        if  w > 0. and  h > 0.:
+            io.display_fb_scale = float(dw)/w, float(dh)/h
+        else:
+            io.display_fb_scale = 1.
+        # When the window is minimized,
+        # glfw reports w, h == 0, 0
+        # Hence, `float(dw)/w` crashed the app upon minimizing
+        # with `ZeroDivisionError: float division by zero`.
 
         io.delta_time = 1.0/60
 
