@@ -1186,6 +1186,12 @@ def show_metrics_window(closable=False):
     return opened
 
 
+
+
+def get_time():
+    return cimgui.GetTime()
+
+
 def begin(str name, closable=False, cimgui.ImGuiWindowFlags flags=0):
     """Begin a window.
 

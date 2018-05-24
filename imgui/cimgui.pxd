@@ -963,7 +963,7 @@ cdef extern from "imgui.h" namespace "ImGui":
     bool IsRootWindowOrAnyChildHovered() except +  # ✓
     bool IsRectVisible(const ImVec2& size) except +  # ✓
     bool IsPosHoveringAnyWindow(const ImVec2& pos) except +  # ✓
-    float GetTime() except +  # ✗
+    float GetTime() except +  # ✓
     int GetFrameCount() except +  # ✗
     const char* GetStyleColName(ImGuiCol idx) except +  # ✗
     ImVec2 CalcItemRectClosestPoint(  # ✗
