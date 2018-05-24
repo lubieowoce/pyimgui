@@ -103,7 +103,7 @@ class GlfwRenderer(ProgrammablePipelineRenderer):
         if  w > 0. and  h > 0.:
             io.display_fb_scale = float(dw)/w, float(dh)/h
         else:
-            io.display_fb_scale = 1.
+            io.display_fb_scale = 1., 1.
         # When the window is minimized,
         # glfw reports w, h == 0, 0
         # Hence, `float(dw)/w` crashed the app upon minimizing
