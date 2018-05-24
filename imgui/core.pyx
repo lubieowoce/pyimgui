@@ -23,6 +23,7 @@ from libc.stdlib cimport malloc, free
 from libc.stdint cimport uintptr_t
 from libc.string cimport strdup
 from libc.string cimport strncpy
+from libc.float  cimport FLT_MAX
 from libcpp cimport bool
 
 cimport cimgui
@@ -5528,6 +5529,101 @@ def end_group():
         void EndGroup()
     """
     cimgui.EndGroup()
+
+
+def plot_lines(
+    str label,
+    const float[:] values,
+    graph_size = (0, 0), # TODO: consider adding auto-sizing with (-1,-1), which ImGui 1.49 doesn't do
+    float scale_min = FLT_MAX,
+    float scale_max = FLT_MAX,
+    overlay_text = None,
+
+    int values_offset = 0,
+    int values_count  = -1,
+    int stride = sizeof(float),
+    ):
+
+    """
+    Plot a 1D array of float values.
+    Args:
+        label (str): A plot label that will be displayed on its right.
+            Note: If you don't want the label to be visible, add "##" before the label's text:
+                "my_label" -> "##my_label"
+        values (array of floats): values to plot on the y axis.
+            It must be a type that supports Cython's MemoryViews,
+            (See: http://docs.cython.org/en/latest/src/userguide/memoryviews.html)
+            for example a numpy array. The array can be either writable or readonly,
+            `plot_lines` doesn't modify it.
+
+        graph_size (tuple of two floats): plot size in pixels.
+            Note: In ImGui 1.49, (-1,-1) will NOT auto-size the plot.
+            To do that, use :func:`get_content_region_available` and pass in the right size.
+        scale_min (float, optional): y-value at the bottom of the plot.
+        scale_max (float, optional): y-value at the top of the plot.
+        overlay_text (str): Overlay text.
+
+        Note: These low-level parameters are exposed if needed for performance.
+        values_offset (int): Index of first element to display
+        values_count (int): Number of values to display. -1 will use the entire array.
+        stride (int): Number of bytes to move to read next element.
+
+
+
+    .. wraps::
+            void PlotLines(
+                const char* label, const float* values, int values_count,
+
+                int values_offset = 0, const char* overlay_text = NULL,
+                float scale_min = FLT_MAX, float scale_max = FLT_MAX,
+                ImVec2 graph_size = ImVec2(0,0),
+                int stride = sizeof(float)
+            )
+
+    """
+
+    # Get a readonly memory view of the array
+    #   http://docs.cython.org/en/latest/src/userguide/memoryviews.html
+    # The 'readonly' part seems to only work on Cython >= 0.28:
+    #   https://github.com/cython/cython/pull/1869
+    # We can throw out the `const`s if older Cythons need to be supported.
+    cdef const float[:] values_view = values
+    cdef const float *values_ptr = &values_view[0]
+    cdef int values_count_ = values_count if values_count != -1 else len(values)  
+
+    cdef const char *overlay_text_ptr = strdup(_bytes(overlay_text)) if overlay_text is not None else NULL
+    cimgui.PlotLines(
+        _bytes(label), values_ptr, values_count_,
+        values_offset,
+        overlay_text_ptr,
+        scale_min, scale_max,
+        _cast_tuple_ImVec2(graph_size),
+        stride
+    )
+    if overlay_text is not None and overlay_text_ptr != NULL:
+        free(<void*> overlay_text_ptr)
+
+    # if overlay_text is not None:
+    #     cimgui.PlotLines(
+    #         _bytes(label), values_ptr, values_count_,
+    #         values_offset,
+    #         _bytes(overlay_text),
+    #         scale_min, scale_max,
+    #         _cast_tuple_ImVec2(graph_size),
+    #         stride
+    #     )
+    # else:
+    #     cimgui.PlotLines(
+    #         _bytes(label), values_ptr, values_count_,
+    #         values_offset,
+    #         NULL,
+    #         scale_min, scale_max,
+    #         _cast_tuple_ImVec2(graph_size),
+    #         stride
+    #     )
+
+
+
 
 # additional helpers
 # todo: move to separate extension module (extra?)
