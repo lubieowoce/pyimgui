@@ -1034,6 +1034,17 @@ cdef class _IO(object):
         if io.render_callback:
             io.render_callback(_DrawData.from_ptr(data))
 
+    @property
+    def _mouse_clicked_time(self):
+        cdef cvarray mouse_clicked_time = cvarray(
+            shape=(5,),
+            format='f',
+            itemsize=sizeof(float),
+            allocate_buffer=False
+        )
+        mouse_clicked_time.data = <char*>self._ptr.MouseClickedTime
+        return mouse_clicked_time
+
 
 _io = None
 def get_io():
@@ -1186,6 +1197,29 @@ def show_metrics_window(closable=False):
     return opened
 
 
+def get_draw_data():
+    """Get draw data.
+
+    Draw data value is same as passed to your ``io.render_callback()``
+    function. It is valid after :any:`render()` and until the next call
+    to :any:`new_frame()`
+
+    Returns:
+        _DrawData: draw data for all draw calls required to display gui
+
+    .. wraps::
+        ImDrawData* GetDrawData()
+    """
+    return _DrawData.from_ptr(cimgui.GetDrawData())
+
+def get_window_draw_list():
+    # TODO: document
+    return _DrawList.from_ptr(cimgui.GetWindowDrawList())
+
+# TODO: requires newer imgui
+# def get_overlay_draw_list():
+#     # TODO: document
+#     return _DrawList.from_ptr(cimgui.GetOverlayDrawList())
 
 
 def get_time():
@@ -1224,31 +1258,6 @@ def begin(str name, closable=False, cimgui.ImGuiWindowFlags flags=0):
     return cimgui.Begin(_bytes(name), &opened if closable else NULL, flags), opened
 
 
-def get_draw_data():
-    """Get draw data.
-
-    Draw data value is same as passed to your ``io.render_callback()``
-    function. It is valid after :any:`render()` and until the next call
-    to :any:`new_frame()`
-
-    Returns:
-        _DrawData: draw data for all draw calls required to display gui
-
-    .. wraps::
-        ImDrawData* GetDrawData()
-    """
-    return _DrawData.from_ptr(cimgui.GetDrawData())
-
-def get_window_draw_list():
-    # TODO: document
-    return _DrawList.from_ptr(cimgui.GetWindowDrawList())
-
-# TODO: requires newer imgui
-# def get_overlay_draw_list():
-#     # TODO: document
-#     return _DrawList.from_ptr(cimgui.GetOverlayDrawList())
-
-
 def end():
     """End a window.
 
@@ -1259,6 +1268,8 @@ def end():
         void End()
     """
     cimgui.End()
+
+
 
 
 ctypedef fused child_id:
@@ -2128,7 +2139,7 @@ def end_menu():
 
 
 def menu_item(
-    str name, str shortcut=None, cimgui.bool selected=None, enabled=True
+    str name, str shortcut=None, cimgui.bool selected=False, enabled=True
 ):
     """Create a menu item.
 
@@ -4816,6 +4827,23 @@ def is_mouse_up(int button = 0):
         bool IsMouseDown(int button)
     """
     return not cimgui.IsMouseDown(button)
+
+
+def is_mouse_double_clicked(int button = 0):
+    """Returns if the second click of a double-click happened this frame.
+    The duration of a double-click can be read/modified with IO_.mouse_double_click_time
+
+    Args:
+        button (int): mouse button index.
+        repeat (float): 
+
+    Returns:
+        bool: if the mouse was clicked this frame.
+
+    .. wraps::
+        bool IsMouseDoubleClicked(int button = 0)
+    """
+    return cimgui.IsMouseDoubleClicked(button)
 
 
 def is_mouse_dragging(int button = 0, float lock_threshold = -1.0):
