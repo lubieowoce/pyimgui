@@ -4831,7 +4831,7 @@ def is_mouse_up(int button = 0):
 
 def is_mouse_double_clicked(int button = 0):
     """Returns if the second click of a double-click happened this frame.
-    The duration of a double-click can be read/modified with IO_.mouse_double_click_time
+    The duration of a double-click can be read/modified with get_io().mouse_double_click_time
 
     Args:
         button (int): mouse button index.
