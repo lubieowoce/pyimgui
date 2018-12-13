@@ -419,11 +419,12 @@ cdef extern from "imgui.h" namespace "ImGui":
             # note: optional
             ImGuiCond cond
     ) except +
-    void SetNextWindowSizeConstraints(  # ✗
+    void SetNextWindowSizeConstraints(  # ✓
             const ImVec2& size_min,
             const ImVec2& size_max,
-            ImGuiSizeCallback custom_callback,
-            void* custom_callback_data
+            # note: optional
+            ImGuiSizeCallback custom_callback, # = NULL
+            void* custom_callback_data         # = NULL
     ) except +
     void SetNextWindowContentSize(const ImVec2& size) except +  # ✗
     void SetNextWindowCollapsed(  # ✓

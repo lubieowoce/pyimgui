@@ -2019,6 +2019,38 @@ def set_next_window_size(
     cimgui.SetNextWindowSize(_cast_args_ImVec2(width, height), condition)
 
 
+def set_next_window_size_constraints(
+        float min_width  = 0,
+        float min_height = 0,
+        float max_width  = FLT_MAX,
+        float max_height = FLT_MAX,
+    ):
+    """Set size constraints for the next window.
+
+    All of the arguments are optional, so the function can be used like
+    `set_next_window_size_constraints(max_width=500)` to limit only the width.
+
+    Args:
+        min_width, min_height (float): Optional. Minimum window dimensions, the default is `0`
+        max_width, max_height (float): Optional. Maximum window dimensions, the default is `FLT_MAX` (unconstrained)
+        You can also pass `-1` for any of these to preserve the current size. 
+
+    .. wraps::
+        void SetNextWindowSizeConstraints(
+            const ImVec2& size_min,
+            const ImVec2& size_max,
+            ImGuiSizeCallback custom_callback = NULL,
+            void* custom_callback_data = NULL
+        )
+    """
+    cimgui.SetNextWindowSizeConstraints(
+        _cast_args_ImVec2(min_width, min_height),
+        _cast_args_ImVec2(max_width, max_height),
+        NULL,
+        NULL,
+    )
+
+
 def is_window_collapsed():
     """Check if current window is collapsed.
 
