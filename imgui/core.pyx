@@ -2051,6 +2051,111 @@ def set_next_window_size_constraints(
     )
 
 
+from cpython.ref cimport PyObject
+
+def unsafe_set_next_window_size_constraints(
+        float min_width  = 0,
+        float min_height = 0,
+        float max_width  = FLT_MAX,
+        float max_height = FLT_MAX,
+        callback=None,
+    ):
+    """Set next window size constraints.
+
+    All of the arguments are optional, so the function can be used like
+    `set_next_window_size_constraints(max_width=500)` to limit only the width.
+
+    Args:
+        min_width, min_height (float): Optional. Minimum window dimensions, the default is `0`
+        max_width, max_height (float): Optional. Maximum window dimensions, the default is `FLT_MAX` (unconstrained)
+        You can also pass `-1` for any of these to preserve the current size. 
+
+        callback: Optional. a function `(tuple position, tuple current_size, tuple desired_size) -> tuple or None`
+            For example, if a constrained window is being resized:
+                - `current_size` will be its pre-resize size
+                - `desired_size` will be its post-resize size.         
+            If `callback` returns a size tuple `(width, height)`, the window's dimensions will be set to that size.
+            If `callback` returns `None`, the window dimensions will be set to `desired_size`.
+            Note: `desired_size` will already be clamped to fit `min_width/height` and `max_width/_height`.
+
+    .. wraps::
+        void SetNextWindowSizeConstraints(
+            const ImVec2& size_min,
+            const ImVec2& size_max,
+            ImGuiSizeCallback custom_callback = NULL,
+            void* custom_callback_data = NULL
+        )
+    """
+
+
+    if callback is not None:
+        # USING A PYTHON FUNCTION AS A C CALLBACK
+        #
+        # `SetNextWindowSizeConstraints` takes a `ImGuiSizeCallback custom_callback`
+        # and optional arbitrary `void* custom_callback_data`. 
+        # But `custom_callback` must be a C function, so we can't directly use `callback`, a python function.
+        # Fortunately, `custom_callback_data` can contain arbitrary data,
+        # so we can just stash our python `callback` in there.
+        # To actually run it, we'll need a "runner" C-function `_apply_python_SizeCallback`
+        # which knows how to call the stashed python callback and pass the result back to `ImGui`.
+        #
+        # Honestly, it's horrible, but apparently that's the official way of handling stuff like this :/
+        #     (that's how Cython docs handle a scenario like this in the second link)
+        #
+        # REFERENCES
+        # "is it possible to pass a python function as c function pointer?"
+        #     https://groups.google.com/d/msg/cython-users/s2sLCgL8V80/Wxtb_dmNFAAJ
+        # Example from the Cython docs:
+        #     https://github.com/cython/cython/blob/master/Demos/callback/cheese.pyx
+
+        # NOTE (IMPORTANT!!!)
+        # ImGui will store `void* custom_callback_data` (which contains our `callback`)
+        # for later and call `custom_callback` (our `_apply_python_SizeCallback`)
+        # during the next `ImGui::Begin()`, possibly multiple times.
+        # Unfortunately, Python's GC isn't aware of that reference to `callback`,
+        # so if `callback` is a lambda or another temporary function object,
+        # it may get garbage collected before it's called. This will result in an ugly crash :/
+
+        print('unsafe_set_next_window_size_constraints :: callback refcount:', (<PyObject*>callback).ob_refcnt)
+        cimgui.SetNextWindowSizeConstraints(
+            _cast_args_ImVec2(min_width, min_height),
+            _cast_args_ImVec2(max_width, max_height),
+            <cimgui.ImGuiSizeCallback>_apply_python_SizeCallback,
+            <void*>callback,
+        )
+        return callback
+
+    else:
+        cimgui.SetNextWindowSizeConstraints(
+            _cast_args_ImVec2(min_width, min_height),
+            _cast_args_ImVec2(max_width, max_height),
+            NULL,
+            NULL,
+        )
+
+
+cdef void _apply_python_SizeCallback(cimgui.ImGuiSizeCallbackData *inout_callback_data):
+    """
+    Used to call a Python function as a callback for `SetNextWindowSizeConstraints()`.
+    See the "USING A PYTHON FUNCTION AS A C CALLBACK" comment
+    in `set_next_window_constraints` for explanation.
+    """
+    # retrieve the python callback stashed in `inout_callback_data.UserData`
+    # by `set_next_window_size_constraints` and call it
+    
+    callback = <object>(inout_callback_data.UserData)
+    print('_apply_python_SizeCallback :: callback refcount:', (<PyObject*>callback).ob_refcnt)
+    maybe_desired_size = callback(
+        _cast_ImVec2_tuple(inout_callback_data.Pos),
+        _cast_ImVec2_tuple(inout_callback_data.CurrentSize),
+        _cast_ImVec2_tuple(inout_callback_data.DesiredSize),
+    )
+
+    # if a result was returned, write it back into `callback_data` (that's how ImGui wants it)
+    if maybe_desired_size is not None:
+        inout_callback_data.DesiredSize = _cast_tuple_ImVec2(maybe_desired_size)
+
+
 def is_window_collapsed():
     """Check if current window is collapsed.
 

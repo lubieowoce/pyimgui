@@ -31,7 +31,7 @@ cdef extern from "imgui.h":
     ctypedef struct ImGuiTextFilter
     ctypedef struct ImGuiTextBuffer
     ctypedef struct ImGuiInputTextCallbackData
-    ctypedef struct ImGuiSizeCallbackData
+
     ctypedef struct ImGuiListClipper
     ctypedef struct ImGuiPayload
     ctypedef struct ImGuiContext
@@ -66,7 +66,6 @@ cdef extern from "imgui.h":
     ctypedef int ImGuiTreeNodeFlags
     ctypedef int ImGuiWindowFlags
     ctypedef int (*ImGuiInputTextCallback)(ImGuiInputTextCallbackData *data);
-    ctypedef void (*ImGuiSizeCallback)(ImGuiSizeCallbackData* data);
 
     ctypedef struct ImVec2:
         float x
@@ -326,6 +325,15 @@ cdef extern from "imgui.h":
         # note: originally Colors[ImGuiCol_COUNT]
         # todo: find a way to access enum var here
         ImVec4*     Colors
+    
+    ctypedef struct ImGuiSizeCallbackData:
+        void*   UserData       # Read-only.   What user passed to SetNextWindowSizeConstraints()
+        ImVec2  Pos            # Read-only.   Window position, for reference.
+        ImVec2  CurrentSize    # Read-only.   Current window size.
+        ImVec2  DesiredSize    # Read-write.  Desired size, based on user's mouse position. Write to this field to restrain resizing.
+
+    ctypedef void (*ImGuiSizeCallback)(ImGuiSizeCallbackData* data);
+
 
     ctypedef struct ImGuiContext:
         pass
